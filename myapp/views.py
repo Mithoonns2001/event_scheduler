@@ -75,9 +75,6 @@ def login(request):
 
 
 def events_list_user(request, user_id):
-    # Assuming user_id is obtained from the session
-    # If not, you need to handle the logic to retrieve user_id
-    # from session or any other source
     events = Event.objects.all()
     return render(request, 'user_dashboard.html', {'events': events, 'user_id': user_id})
 
@@ -119,7 +116,7 @@ def schedule_event(request):
     if request.method == 'POST':
         name = request.POST['name']
         description = request.POST['description']
-        image = request.FILES.get('image')  # Get the uploaded image file
+        image = request.FILES.get('image')  
         dates_str = request.POST['dates'].strip()  
         dates_list = dates_str.split(',')  
 
@@ -127,7 +124,7 @@ def schedule_event(request):
         parsed_dates = []
         for date_str in dates_list:
             try:
-                parsed_date = datetime.strptime(date_str.strip(), '%d-%m-%Y %H:%M')  # Adjusted format for date and time
+                parsed_date = datetime.strptime(date_str.strip(), '%d-%m-%Y %H:%M')  
                 parsed_dates.append(parsed_date)
             except ValueError:
                 return render(request, 'schedule_event.html', {'error': f"Invalid date format: {date_str}. Please use the format 'dd-mm-yyyy hh:mm'."})
@@ -135,7 +132,7 @@ def schedule_event(request):
         # Create event and event dates
         event = Event.objects.create(name=name, description=description, image=image)
         for date in parsed_dates:
-            EventDate.objects.create(event=event, datetime=date)  # Adjusted to datetime field
+            EventDate.objects.create(event=event, datetime=date) 
 
         return redirect('events_list')
 
@@ -149,15 +146,14 @@ def edit_event(request, event_id):
         event.description = request.POST.get('description')
         event.save()
 
-        # Update event dates
         dates_str = request.POST.get('dates').strip()
         dates_list = [date.strip() for date in dates_str.split(',')]
-        event.eventdate_set.all().delete()  # Remove existing dates
+        event.eventdate_set.all().delete()  
         
         for date_str in dates_list:
             if date_str:
-                date = datetime.strptime(date_str, '%d-%m-%Y %H:%M')  # Adjusted format for date and time
-                EventDate.objects.create(event=event, datetime=date)  # Use datetime field instead of date
+                date = datetime.strptime(date_str, '%d-%m-%Y %H:%M')  
+                EventDate.objects.create(event=event, datetime=date)  
 
 
         return redirect('events_list')
@@ -198,7 +194,7 @@ def vote_date_user(request, user_id, event_id):
         
         Vote.objects.create(user_id=user_id, event_id=event_id, event_date=selected_date)
         
-        # Increment the votes for the selected date
+        # Increment the votes 
         selected_date.votes += 1
         selected_date.save()
         
