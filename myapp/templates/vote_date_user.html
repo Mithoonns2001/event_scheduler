@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vote Date</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-image: url('https://whoamama.com/wp-content/uploads/2020/05/Agilisium_3-scaled.jpg'); 
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+                }
+        .container {
+            max-width: 600px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        form {
+            margin-bottom: 20px;
+        }
+        label {
+            font-weight: bold;
+        }
+        select {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        input[type="submit"] {
+            padding: 10px 20px;
+            border: none;
+            background-color: #007bff;
+            color: #fff;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: background-color 0.3s ease;
+        }
+        input[type="submit"]:hover {
+            background-color: #0056b3;
+        }
+        .event-info {
+            margin-bottom: 20px;
+        }
+        .event-info label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        .event-info p {
+            margin: 0;
+        }
+        .event-image {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .event-image img {
+            max-width: 100%;
+            height: 300px;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <audio id="audioPlayer" src="/media/music.mp3" loop controls style="display:none;"></audio>
+
+    <div class="container">
+        <div class="event-title">
+            <h1>{{ event.name }}</h1>
+        </div>
+        {% if event.image %}
+
+        <div class="event-image">
+            <img src="{{ event.image.url }}" alt="{{ event.name }}">
+        </div>
+        {% endif %}
+        <div class="event-info">
+            <label for="event_description">Event Description:</label>
+            <p>{{ event.description }}</p>
+        </div>
+        <div class="event-dates">
+            <form method="post">
+                {% csrf_token %}
+                <label for="selected_date">Select Date:</label><br>
+                <select id="selected_date" name="selected_date">
+                    {% for event_date in event.eventdate_set.all %}
+                    <option value="{{ event_date.id }}">{{ event_date.datetime }}</option>
+                    {% endfor %}
+                </select><br>
+                <input type="submit" value="Enroll">
+            </form>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('mousemove', function() {
+            var audio = document.getElementById('audioPlayer');
+            if (audio.paused) {
+                audio.play();
+            }
+        });
+        </script>
+</body>
+</html>

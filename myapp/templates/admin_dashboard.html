@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>All Events</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-image: url('https://whoamama.com/wp-content/uploads/2020/05/Agilisium_3-scaled.jpg'); 
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            color: #333;
+        }
+        a {
+            text-decoration: none;
+            color: #007bff;
+            transition: color 0.3s ease;
+        }
+        a:hover {
+            color: #0056b3;
+        }
+        .container {
+            max-width: 1300px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            
+        }
+        h1, h2, h3 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .event-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-gap: 30px;
+            justify-content: center;
+        }
+        .event-item {
+            text-align: center;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        .event-item:hover {
+            transform: translateY(-5px);
+        }
+        .event-image {
+            width: 100%;
+            height: 200px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+        .event-item:hover .event-image {
+            transform: scale(1.05);
+        }
+        .event-description {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+            background-color: rgba(0, 0, 0, 0.7);
+            color: #fff;
+            padding: 20px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .event-item:hover .event-description {
+            opacity: 1;
+        }
+        .event-name {
+            margin-top: 15px;
+            font-weight: bold;
+            font-size: 18px;
+        }
+        .notification-btn {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            position: absolute;
+            top: 20px;
+            right: 20px;
+        }
+        .notification-btn:hover {
+            background-color: #0056b3;
+        }
+        .admin-btn {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            position: absolute;
+            top: 20px;
+            left: 120px;
+        }
+        .admin-btn:hover {
+            background-color: #0056b3;
+        }
+        .logout-btn {
+            background-color: #ff0000;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            position: absolute;
+            top: 20px;
+            left: 20px;
+        }
+        .logout-btn:hover {
+            background-color: #b30000;
+        }
+        .schedule-btn {
+            background-color: #1ee100;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            position: absolute;
+            top: 120px;
+            left: 100px;
+        }
+        .schedule-btn:hover {
+            background-color: #39b300;
+        }
+    </style>
+</head>
+<body>
+    <audio id="audioPlayer" src="/media/music.mp3" loop controls style="display:none;"></audio>
+
+    <h3 style="color: #007bff; text-align: center;">WELCOME {{ user.first_name }} {{ user.last_name }}!</h3>
+
+    <div class="container">
+        <button class="notification-btn" onclick="location.href='{% url 'notification' %}'">View Notifications</button>
+        <button class="admin-btn" onclick="location.href='{% url 'admin_register' %}'">Admin</button>
+        <button class="logout-btn" onclick="location.href='{% url 'logout' %}'">Logout</button>
+
+        <h1>Events</h1>
+        <h2>Admin Dashboard</h2>
+        <button class="schedule-btn" onclick="location.href='{% url 'schedule_event' %}'" >Schedule Event</button>
+
+        <div class="event-grid">
+            {% for event in events %}
+            <div class="event-item">
+                {% if event.image %}
+                <img src="{{ event.image.url }}" alt="{{ event.name }}" class="event-image" >
+                {% else %}
+                <img src="https://whoamama.com/wp-content/uploads/2020/05/Agilisium_1-scaled.jpg" alt="No Image Available" class="event-image">
+                {% endif %}
+                <div class="event-description" onclick="location.href='{% url 'edit_event' event.id %}'">
+                    <p>{% for event_date in event.eventdate_set.all %}
+                    <li>{{ event_date.datetime }} (<span>{{ event_date.votes }}</span> enrolled)</li>
+                    {% endfor %}</p>
+                    <p>{{ event.description }}</p>
+                </div>
+                <p class="event-name">{{ event.name }}</p>
+             </div>
+            {% endfor %}
+        </div>
+    </div>
+    <script>
+        document.addEventListener('mousemove', function() {
+            var audio = document.getElementById('audioPlayer');
+            if (audio.paused) {
+                audio.play();
+            }
+        });
+        </script>
+</body>
+</html>
+
+

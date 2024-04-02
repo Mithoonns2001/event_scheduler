@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Event Notifications</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background-image: url('https://whoamama.com/wp-content/uploads/2020/05/Agilisium_3-scaled.jpg'); 
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+        }
+        .notification {
+            background-color: #fff;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            margin-bottom: 15px;
+            padding: 15px;
+        }
+        .notification-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        .notification-content {
+            font-size: 16px;
+        }
+        .notification-user {
+            color: #007bff;
+        }
+    </style>
+</head>
+<body>
+    <audio id="audioPlayer" src="/media/music.mp3" loop controls style="display:none;"></audio>
+
+    <a href="{% url 'events_list' %}">Back to Events List</a>
+
+    <h2>Event Notifications</h2>
+
+    {% for vote in recent_votes %}
+    <div class="notification">
+        <p class="notification-content">
+            <span class="notification-user">{{ vote.user.first_name }} {{ vote.user.last_name }}</span> voted on 
+            <span class="notification-time">{{ vote.voted_at }}</span> to enroll in Event
+            <span class="notification-user">"{{ vote.event.name }}"</span> for <span class="notification-date">{{ vote.event_date.datetime }}</span>  
+        </p>
+    </div>
+    {% endfor %}
+    <script>
+        document.addEventListener('mousemove', function() {
+            var audio = document.getElementById('audioPlayer');
+            if (audio.paused) {
+                audio.play();
+            }
+        });
+        </script>
+</body>
+</html>

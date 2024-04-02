@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Event</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            color: #333;
+
+            background-image: url('https://whoamama.com/wp-content/uploads/2020/05/Agilisium_3-scaled.jpg'); 
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+        }
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .event-image {
+            width: 100%;
+            height: 300px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        form {
+            margin-bottom: 20px;
+        }
+        label {
+            font-weight: bold;
+            display: block;
+            margin-bottom: 5px;
+        }
+        input[type="text"],
+        textarea {
+            width: calc(100% - 22px);
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ced4da;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+        input[type="file"] {
+            width: calc(100% - 22px);
+            padding: 8px;
+            margin-bottom: 10px;
+            border: 1px solid #ced4da;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+        input[type="submit"],
+        .delete-btn {
+            width: 100%;
+            padding: 10px;
+            border: none;
+            background-color: #dc3545;
+            color: #fff;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: background-color 0.3s ease;
+        }
+        
+        .delete-btn:hover {
+            background-color: #c82333;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .download-btn {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            background-color: #007bff;
+            color: #fff;
+            text-align: center;
+            text-decoration: none;
+            border-radius: 5px;
+            margin-top: 20px;
+            transition: background-color 0.3s ease;
+            cursor: pointer;
+        }
+        .download-btn:hover {
+            background-color: #0056b3;
+        }
+        .back-link {
+            display: block;
+            text-align: center;
+            margin-bottom: 20px;
+            color: #007bff;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+        .back-link:hover {
+            color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <audio id="audioPlayer" src="/media/music.mp3" loop controls style="display:none;"></audio>
+
+    
+    <div class="container">
+        <a href="{% url 'events_list' %}" class="back-link">Back to Events List</a>
+        <h1>Edit Event</h1>
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+
+            {% if event.image %}
+                <img src="{{ event.image.url }}" alt="{{ event.name }}" class="event-image">    
+            {% endif %}            
+            <label for="name">Event Name:</label>
+            <input type="text" id="name" name="name" value="{{ event.name }}">
+            <label for="description">Event Description:</label>
+            <textarea id="description" name="description" rows="4">{{ event.description }}</textarea>
+            <label for="dates">Event Dates:</label>
+            <input type="text" id="dates" name="dates" value="{% for date in event.eventdate_set.all %}{{ date.date|date:'d-m-Y' }}{% if not forloop.last %},{% endif %}{% endfor %}">
+            <input type="submit" class="save-btn" value="Save Changes" style="width: 100%;
+            padding: 10px;
+            border: none;
+            background-color: #16b30e;
+            color: #fff;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: background-color 0.3s ease;">
+        </form>
+        <form method="post" action="{% url 'delete_event' event.id %}" onsubmit="return confirm('Are you sure you want to delete this event?');">
+            {% csrf_token %}
+            <input type="submit" class="delete-btn" value="Delete Event">
+        </form>
+
+        <!-- Voting Details Table -->
+        <h2>Voting Details for Event: {{ event.name }}</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>User Name</th>
+                    <th>Email</th>
+                    <th>Selected Date</th>
+                    <th>Voted Date</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for vote in event.vote_set.all %}
+                <tr>
+                    <td>{{ vote.user.first_name }} {{ vote.user.last_name }}</td>
+                    <td>{{ vote.user.email }}</td>
+                    <td>{{ vote.event_date.date|date:'d-m-Y' }}</td>
+                    <td>{{ vote.voted_at|date:'d-m-Y H:i:s' }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <!-- Download CSV Button -->
+        <button id="download-btn" class="download-btn">Download Voting Details as CSV</button>
+    </div>
+    <script>
+        document.getElementById('download-btn').addEventListener('click', function() {
+            // Create a CSV content
+            var csvContent = "data:text/csv;charset=utf-8,";
+            csvContent += "User Name,Email,Selected Date,Voted Date\n";
+            {% for vote in event.vote_set.all %}
+            csvContent += "{{ vote.user.first_name }} {{ vote.user.last_name }},{{ vote.user.email }},{{ vote.event_date.date|date:'d-m-Y' }},{{ vote.voted_at|date:'d-m-Y H:i:s' }}\n";
+            {% endfor %}
+    
+            // Create a download link
+            var encodedUri = encodeURI(csvContent);
+            var link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", "{{ event.name }}_voting_details.csv");
+            document.body.appendChild(link);
+    
+            // Trigger the download
+            link.click();
+        });
+    </script>
+    
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script>
+        flatpickr("#dates", {
+            mode: "multiple",
+            dateFormat: "d-m-Y H:i", // Include time (hours and minutes)
+            enableTime: true, // Enable time selection
+
+            onClose: function(selectedDates, dateStr, instance) {
+                // Format the selected dates in the expected format
+                const formattedDates = selectedDates.map(date => {
+                    const day = date.getDate().toString().padStart(2, '0');
+                    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+                    const year = date.getFullYear();
+                    const hours = date.getHours().toString().padStart(2, '0');
+                    const minutes = date.getMinutes().toString().padStart(2, '0');
+                    return `${day}-${month}-${year} ${hours}:${minutes}`;
+                });
+                document.getElementById('dates').value = formattedDates.join(', ');
+            }
+        });
+    </script>
+    <script>
+        document.addEventListener('mousemove', function() {
+            var audio = document.getElementById('audioPlayer');
+            if (audio.paused) {
+                audio.play();
+            }
+        });
+        </script>
+</body>
+</html>
+
